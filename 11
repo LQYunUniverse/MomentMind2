@@ -1,0 +1,19 @@
+# MomentMind - 支持两个不同Azure资源的环境变量配置
+
+# Chat（benja-mauryh2z-...，GPT-5-mini）
+AZURE_OPENAI_KEY_CHAT=E2Ekj......
+AZURE_OPENAI_ENDPOINT_CHAT=https://benja-mauryh2z-swedencentral.cognitiveservices.azure.com/
+AZURE_OPENAI_DEPLOYMENT_CHAT=gpt-5-mini
+AZURE_OPENAI_API_VERSION_CHAT=2024-12-01-preview
+
+# Image（feiyue1112.openai.azure.com，DALL·E 3）
+AZURE_OPENAI_KEY_IMAGE=8dmcYVccd.....
+AZURE_OPENAI_ENDPOINT_IMAGE=https://feiyue1112.openai.azure.com/
+AZURE_OPENAI_DEPLOYMENT_IMAGE=dall-e-3
+AZURE_OPENAI_API_VERSION_IMAGE=2024-02-01
+
+# 服务器配置
+PORT=8787
+
+# 开发模式设置
+MOCK_OPENAI=0
