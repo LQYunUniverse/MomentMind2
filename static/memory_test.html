@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MomentMind 记忆系统测试</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        
+        .section h3 {
+            color: #555;
+            margin-top: 0;
+        }
+        
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #e9ecef;
+            border-left: 4px solid #007bff;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+        
+        .memory-item {
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 3px solid #007bff;
+        }
+        
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 MomentMind 记忆系统测试</h1>
+        
+        <!-- 记忆系统状态 -->
+        <div class="section">
+            <h3>📊 系统状态</h3>
+            <button onclick="checkMemoryStatus()">检查记忆系统状态</button>
+            <div id="statusResult" class="result" style="display:none;"></div>
+        </div>
+        
+        <!-- 添加灵感记忆 -->
+        <div class="section">
+            <h3>💡 添加灵感记忆</h3>
+            <input type="text" id="inspirationContent" placeholder="输入你的灵感内容...">
+            <input type="text" id="inspirationContext" placeholder="灵感来源或上下文（可选）">
+            <input type="text" id="inspirationUserId" placeholder="用户ID（默认：default）" value="alice">
+            <button onclick="addInspirationMemory()">添加灵感记忆</button>
+            <div id="inspirationResult" class="result" style="display:none;"></div>
+        </div>
+        
+        <!-- 智能对话（带记忆） -->
+        <div class="section">
+            <h3>💬 智能对话（基于记忆）</h3>
+            <textarea id="conversationInput" placeholder="和AI对话，它会记住你的偏好..." rows="3"></textarea>
+            <input type="text" id="conversationUserId" placeholder="用户ID（默认：default）" value="alice">
+            <button onclick="startConversation()">开始对话</button>
+            <div id="conversationResult" class="result" style="display:none;"></div>
+        </div>
+        
+        <!-- 搜索记忆 -->
+        <div class="section">
+            <h3>🔍 搜索记忆</h3>
+            <input type="text" id="searchQuery" placeholder="搜索你的记忆...">
+            <input type="text" id="searchUserId" placeholder="用户ID（默认：default）" value="alice">
+            <input type="number" id="searchLimit" placeholder="结果数量限制" value="5" min="1" max="20">
+            <button onclick="searchMemories()">搜索记忆</button>
+            <div id="searchResult" class="result" style="display:none;"></div>
+        </div>
+        
+        <!-- 查看所有记忆 -->
+        <div class="section">
+            <h3>📚 查看所有记忆</h3>
+            <input type="text" id="allMemoriesUserId" placeholder="用户ID（默认：default）" value="alice">
+            <button onclick="getAllMemories()">获取所有记忆</button>
+            <div id="allMemoriesResult" class="result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';  // 空字符串表示使用当前域名
+        
+        // 通用的API调用函数
+        async function callAPI(endpoint, data = null, method = 'GET') {
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(API_BASE + endpoint, options);
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+        
+        // 显示结果的通用函数
+        function showResult(elementId, result, title = '') {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            
+            if (result.success) {
+                element.className = 'result success';
+                element.innerHTML = `
+                    ${title ? `<strong>${title}</strong><br>` : ''}
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+            } else {
+                element.className = 'result error';
+                element.innerHTML = `
+                    <strong>错误:</strong> ${result.error || '未知错误'}
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+            }
+        }
+        
+        // 检查记忆系统状态
+        async function checkMemoryStatus() {
+            const result = await callAPI('/api/memory/status');
+            showResult('statusResult', result, '记忆系统状态');
+        }
+        
+        // 添加灵感记忆
+        async function addInspirationMemory() {
+            const content = document.getElementById('inspirationContent').value;
+            const context = document.getElementById('inspirationContext').value;
+            const userId = document.getElementById('inspirationUserId').value || 'default';
+            
+            if (!content) {
+                alert('请输入灵感内容');
+                return;
+            }
+            
+            const data = {
+                content: content,
+                context: context,
+                user_id: userId
+            };
+            
+            const result = await callAPI('/api/memory/add_inspiration', data, 'POST');
+            showResult('inspirationResult', result, '添加灵感记忆结果');
+        }
+        
+        // 智能对话
+        async function startConversation() {
+            const userInput = document.getElementById('conversationInput').value;
+            const userId = document.getElementById('conversationUserId').value || 'default';
+            
+            if (!userInput) {
+                alert('请输入对话内容');
+                return;
+            }
+            
+            const data = {
+                user_input: userInput,
+                user_id: userId
+            };
+            
+            const result = await callAPI('/api/memory/add_conversation', data, 'POST');
+            
+            if (result.success) {
+                // 特殊处理对话结果，显示AI回复
+                const element = document.getElementById('conversationResult');
+                element.style.display = 'block';
+                element.className = 'result success';
+                element.innerHTML = `
+                    <strong>AI回复:</strong><br>
+                    <div style="background: white; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                        ${result.response}
+                    </div>
+                    <strong>相关记忆 (${result.related_memories?.length || 0} 条):</strong><br>
+                    ${result.related_memories?.map(mem => `
+                        <div class="memory-item">
+                            ${mem.memory || JSON.stringify(mem)}
+                        </div>
+                    `).join('') || '无相关记忆'}
+                    <details>
+                        <summary>完整响应数据</summary>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </details>
+                `;
+            } else {
+                showResult('conversationResult', result, '对话失败');
+            }
+        }
+        
+        // 搜索记忆
+        async function searchMemories() {
+            const query = document.getElementById('searchQuery').value;
+            const userId = document.getElementById('searchUserId').value || 'default';
+            const limit = parseInt(document.getElementById('searchLimit').value) || 5;
+            
+            if (!query) {
+                alert('请输入搜索内容');
+                return;
+            }
+            
+            const data = {
+                query: query,
+                user_id: userId,
+                limit: limit
+            };
+            
+            const result = await callAPI('/api/memory/search', data, 'POST');
+            
+            if (result.success) {
+                const element = document.getElementById('searchResult');
+                element.style.display = 'block';
+                element.className = 'result success';
+                element.innerHTML = `
+                    <strong>找到 ${result.count} 条相关记忆:</strong><br>
+                    ${result.memories?.map((mem, index) => `
+                        <div class="memory-item">
+                            <strong>记忆 ${index + 1}:</strong> ${mem.memory || JSON.stringify(mem)}
+                        </div>
+                    `).join('') || '无相关记忆'}
+                    <details>
+                        <summary>完整搜索结果</summary>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </details>
+                `;
+            } else {
+                showResult('searchResult', result, '搜索失败');
+            }
+        }
+        
+        // 获取所有记忆
+        async function getAllMemories() {
+            const userId = document.getElementById('allMemoriesUserId').value || 'default';
+            
+            const result = await callAPI(`/api/memory/all/${userId}`);
+            
+            if (result.success) {
+                const element = document.getElementById('allMemoriesResult');
+                element.style.display = 'block';
+                element.className = 'result success';
+                element.innerHTML = `
+                    <strong>共有 ${result.count} 条记忆:</strong><br>
+                    ${result.memories?.map((mem, index) => `
+                        <div class="memory-item">
+                            <strong>记忆 ${index + 1}:</strong> ${mem.memory || JSON.stringify(mem)}
+                        </div>
+                    `).join('') || '暂无记忆'}
+                    <details>
+                        <summary>完整记忆数据</summary>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </details>
+                `;
+            } else {
+                showResult('allMemoriesResult', result, '获取记忆失败');
+            }
+        }
+        
+        // 页面加载时自动检查状态
+        window.onload = function() {
+            checkMemoryStatus();
+        };
+    </script>
+</body>
+</html>
