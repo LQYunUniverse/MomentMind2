@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MomentMind - 多模态捕获和AI增强系统</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .generated-image {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .recording-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .method-card {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .method-card:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .method-card.active {
+            background: #e7f3ff;
+            border-color: #667eea;
+        }
+
+        .method-card i {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .multimodal-section {
+            grid-column: 1 / -1;
+        }
+
+        .file-upload {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .file-upload:hover {
+            background: #f8f9ff;
+            border-color: #764ba2;
+        }
+
+        .file-upload.dragover {
+            border-color: #764ba2;
+            background: #f0f4ff;
+        }
+
+        .file-upload .clickable {
+            pointer-events: auto !important;
+        }
+
+        .file-upload p {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .recording-methods {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* 可展开模块样式 */
+        .expandable-modules {
+            margin-top: 20px;
+            border-top: 1px solid #e9ecef;
+            padding-top: 20px;
+        }
+
+        .module-item {
+            margin-bottom: 15px;
+        }
+
+        .module-button {
+            width: 100%;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .module-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .module-button i {
+            font-size: 18px;
+        }
+
+        .module-content {
+            margin-top: 10px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .module-content.show {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-brain"></i> MomentMind</h1>
+            <p>从瞬息灵感到空间记忆：多模态捕获和AI增强系统</p>
+        </div>
+
+        <div class="main-content">
+            <!-- 灵感总结卡片 -->
+            <div class="card">
+                <h2><i class="fas fa-lightbulb"></i> AI灵感总结</h2>
+                
+                <div class="form-group">
+                    <label>记录方式</label>
+                    <div class="recording-methods">
+                        <div class="method-card active" data-method="text">
+                            <i class="fas fa-pen"></i>
+                            <div>文本记录</div>
+                        </div>
+                        <div class="method-card" data-method="image">
+                            <i class="fas fa-image"></i>
+                            <div>图片上传</div>
+                        </div>
+                        <div class="method-card" data-method="ppg">
+                            <i class="fas fa-heartbeat"></i>
+                            <div>生理信号</div>
+                        </div>
+                        <div class="method-card" data-method="audio">
+                            <i class="fas fa-microphone"></i>
+                            <div>音频录音</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 图片上传区域 -->
+                <div id="imageUploadSection" class="form-group" style="display: none;">
+                    <label>上传图片</label>
+                    <div class="file-upload" id="inspirationImageUpload">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #667eea; margin-bottom: 10px;"></i>
+                        <p>点击选择图片文件</p>
+                        <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                            支持 JPG, PNG, GIF 格式
+                        </p>
+                    </div>
+                    <input type="file" id="inspirationImageInput" style="display: none;" 
+                           accept="image/*">
+                    
+                    <!-- 调试按钮 -->
+                    <button type="button" id="testUploadBtn" style="margin-top: 10px; padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        测试上传按钮
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label for="inspirationText">灵感内容</label>
+                    <textarea id="inspirationText" class="form-control" 
+                              placeholder="记录您的设计灵感..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="contextText">背景信息（可选）</label>
+                    <textarea id="contextText" class="form-control" 
+                              placeholder="相关背景、项目信息等..."></textarea>
+                </div>
+
+                <button id="summarizeBtn" class="btn">
+                    <i class="fas fa-magic"></i> 生成AI总结
+                </button>
+
+                <div id="summarizeLoading" class="loading">
+                    <div class="spinner"></div>
+                    <p>AI正在分析您的灵感...</p>
+                </div>
+
+                <div id="summarizeResult" class="result">
+                    <h3>AI灵感总结</h3>
+                    <div id="summaryContent"></div>
+                    
+                    <!-- 可展开的扩展模块 -->
+                    <div id="expandableModules" class="expandable-modules" style="display: none;">
+                        <div class="module-item">
+                            <button class="module-button" data-module="cases">
+                                <i class="fas fa-lightbulb"></i>
+                                查看参考案例推荐
+                            </button>
+                            <div id="casesContent" class="module-content"></div>
+                        </div>
+                        
+                        <div class="module-item">
+                            <button class="module-button" data-module="directions">
+                                <i class="fas fa-rocket"></i>
+                                查看可扩展设计方向 (SCAMPER)
+                            </button>
+                            <div id="directionsContent" class="module-content"></div>
+                        </div>
+                        
+                        <div class="module-item">
+                            <button class="module-button" data-module="multimodal">
+                                <i class="fas fa-palette"></i>
+                                查看多模态灵感合成建议
+                            </button>
+                            <div id="multimodalSuggestionsContent" class="module-content"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 图像生成卡片 -->
+            <div class="card">
+                <h2><i class="fas fa-image"></i> AI图像生成</h2>
+                
+                <div class="form-group">
+                    <label for="imagePrompt">图像描述</label>
+                    <textarea id="imagePrompt" class="form-control" 
+                              placeholder="描述您想要生成的设计概念图..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="imageStyle">风格选择</label>
+                    <select id="imageStyle" class="form-control">
+                        <option value="vivid">生动风格</option>
+                        <option value="natural">自然风格</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="imageSize">图像尺寸</label>
+                    <select id="imageSize" class="form-control">
+                        <option value="1024x1024">正方形 (1024x1024)</option>
+                        <option value="1792x1024">横向 (1792x1024)</option>
+                        <option value="1024x1792">纵向 (1024x1792)</option>
+                    </select>
+                </div>
+
+                <button id="generateBtn" class="btn">
+                    <i class="fas fa-palette"></i> 生成图像
+                </button>
+
+                <div id="generateLoading" class="loading">
+                    <div class="spinner"></div>
+                    <p>DALL-E 3正在创作中...</p>
+                </div>
+
+                <div id="generateResult" class="result">
+                    <h3>生成的图像</h3>
+                    <div id="imageContent"></div>
+                </div>
+            </div>
+
+            <!-- 多模态综合处理 -->
+            <div class="card multimodal-section">
+                <h2><i class="fas fa-layer-group"></i> 多模态灵感合成</h2>
+                
+                <div class="form-group">
+                    <label>文件上传（图像/音频）</label>
+                    <div class="file-upload" id="fileUpload">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #667eea; margin-bottom: 15px;"></i>
+                        <p>拖拽文件到此处或点击选择文件</p>
+                        <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">
+                            支持图像、音频文件上传
+                        </p>
+                        <input type="file" id="fileInput" style="display: none;" 
+                               accept="image/*,audio/*">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 15px; align-items: end;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="multimodalText">综合灵感描述</label>
+                        <textarea id="multimodalText" class="form-control" 
+                                  placeholder="结合多种输入方式的灵感描述..."></textarea>
+                    </div>
+                    
+                    <label style="display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+                        <input type="checkbox" id="generateImageCheck"> 
+                        同时生成图像
+                    </label>
+                    
+                    <button id="multimodalBtn" class="btn">
+                        <i class="fas fa-rocket"></i> 综合处理
+                    </button>
+                </div>
+
+                <div id="multimodalLoading" class="loading">
+                    <div class="spinner"></div>
+                    <p>多模态AI正在处理中...</p>
+                </div>
+
+                <div id="multimodalResult" class="result">
+                    <h3>多模态处理结果</h3>
+                    <div id="multimodalContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/app.js?v=20250902-1245"></script>
+</body>
+</html>

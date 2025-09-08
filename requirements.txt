@@ -1,0 +1,39 @@
+# MomentMind - 多模态捕获和AI增强系统依赖
+# Python 3.8+ 兼容
+
+# Web框架
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+
+# Azure OpenAI SDK
+openai>=1.45.0
+
+# HTTP请求
+requests>=2.31.0
+
+# 环境变量管理
+python-dotenv>=1.0.0
+
+# 数据处理
+pydantic>=2.5.0
+
+# 文件处理
+python-multipart>=0.0.6
+
+# 日志记录
+loguru>=0.7.2
+
+# 异步支持
+aiofiles>=23.2.1
+
+# 类型提示支持 - 移除固定版本，让pip自动解决依赖
+typing-extensions>=4.11.0
+
+# 图像处理
+Pillow>=10.0.0
+
+# 开发依赖（可选）
+# pytest>=7.4.3
+# pytest-asyncio>=0.21.1
+# black>=23.11.0
+# flake8>=6.1.0
