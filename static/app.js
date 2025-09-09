@@ -318,7 +318,9 @@ class MomentMindApp {
                 const expandableModules = document.getElementById('expandableModules');
                 if (expandableModules) {
                     expandableModules.style.display = 'block';
-                    this.setupExpandableModules(data.original_text || this.getTextInput());
+                    // 优先使用原始文本，如果没有则使用分析结果的摘要
+                    const textForModules = data.original_text || data.summary || this.getTextInput();
+                    this.setupExpandableModules(textForModules);
                 }
                 result.classList.add('show');
             } else {
